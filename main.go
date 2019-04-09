@@ -53,29 +53,48 @@ type Acro struct {
 	Expan string `xml:"expan"`
 }
 
-func main() {
-	word := os.Args[1]
+func usage(err error) {
+	fmt.Println(err)
+	fmt.Printf("Usage: %s <acronym> [<acronym>]\n", os.Args[0])
+	os.Exit(1)
+}
+
+func getMeanings(word string) ([]string, error) {
 	uri := fmt.Sprintf("http://acronyms.silmaril.ie/cgi-bin/xaa?%s", word)
 	resp, err := http.Get(uri)
 	if err != nil {
-		fmt.Println("could not get list")
-		return
+		return nil, fmt.Errorf("could not get meanings")
 	}
+
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(resp.Body)
-	newStr := buf.String()
-	fmt.Println(newStr)
+	bodyStr := buf.String()
+
 	var acr Acronym
-	if err := xml.Unmarshal([]byte(newStr), &acr); err != nil {
-		fmt.Println("Did not work.")
-		fmt.Println(err)
-		return
+	if err := xml.Unmarshal([]byte(bodyStr), &acr); err != nil {
+		return nil, fmt.Errorf("could not unmarshal: %v", err)
 	}
 
-	fmt.Println("Must have worked.")
-	//fmt.Println(acr.XMLName)
-
+	meanings := make([]string, 0)
 	for _, a := range acr.Found.Acros {
-		fmt.Println(a.Expan)
+		meanings = append(meanings, a.Expan)
+	}
+	return meanings, nil
+}
+
+func main() {
+	if len(os.Args) < 2 {
+		usage(fmt.Errorf("not enough arguments"))
+	}
+	for i := 1; i < len(os.Args); i++ {
+		word := os.Args[i]
+		ms, err := getMeanings(word)
+		if err != nil {
+			usage(fmt.Errorf("could not get meanings: %v", err))
+		}
+		fmt.Printf("%s:\n", word)
+		for _, m := range ms {
+			fmt.Printf("\t%s\n", m)
+		}
 	}
 }
