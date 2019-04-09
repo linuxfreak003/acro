@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"encoding/xml"
 	"fmt"
+	"net/http"
+	"os"
 )
 
 var xmlString = `<?xml version="1.0"?>
@@ -51,9 +54,19 @@ type Acro struct {
 }
 
 func main() {
-	fmt.Println("Starting here")
+	word := os.Args[1]
+	uri := fmt.Sprintf("http://acronyms.silmaril.ie/cgi-bin/xaa?%s", word)
+	resp, err := http.Get(uri)
+	if err != nil {
+		fmt.Println("could not get list")
+		return
+	}
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(resp.Body)
+	newStr := buf.String()
+	fmt.Println(newStr)
 	var acr Acronym
-	if err := xml.Unmarshal([]byte(xmlString), &acr); err != nil {
+	if err := xml.Unmarshal([]byte(newStr), &acr); err != nil {
 		fmt.Println("Did not work.")
 		fmt.Println(err)
 		return

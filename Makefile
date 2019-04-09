@@ -1,10 +1,10 @@
 all: run
 
 run: build
-	./xmltest
+	./what GNU
 
 build: main.go
 	go build
 
 clean:
-	rm -f xmltest
+	rm -f what
