@@ -1,10 +1,10 @@
-all: run
+all: build
 
-run: build
-	./what GNU
+test: build
+	./acro GNU
 
 build: main.go
 	go build
 
 clean:
-	rm -f what
+	rm -f acro

@@ -1,4 +1,4 @@
-# what
-WHAT Holy Acronym Translator
+# acro
+Acronym Search
 
 http://acronyms.silmaril.ie/#qform
